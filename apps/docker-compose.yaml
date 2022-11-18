@@ -1,0 +1,22 @@
+version: '3'
+services:
+  api:
+    build: ./api
+    container_name: nodejs-api
+    volumes:
+      - ./api:/home/node/app
+    ports:
+      - 4000:4000
+    networks:
+      - observability
+  web:
+    build: ./web
+    container_name: web-app
+    ports:
+      - 3000:80
+    networks:
+      - observability
+
+networks:
+  observability:
+    external: true

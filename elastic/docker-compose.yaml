@@ -17,7 +17,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - ./libs/elastic/elasticsearch_data:/usr/share/elasticsearch/data
+      - ./elasticsearch_data:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
     networks: 
@@ -40,7 +40,7 @@ services:
     user: root
     volumes:      
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./libs/elastic/beats/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+      - ./beats/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
     restart: on-failure
     networks: 
       - observability
@@ -49,7 +49,7 @@ services:
     image: docker.elastic.co/beats/heartbeat:7.13.0
     container_name: heartbeat
     volumes:      
-    - ./libs/elastic/beats/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml
+    - ./beats/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml
     networks: 
       - observability
 
@@ -57,29 +57,13 @@ services:
     image: docker.elastic.co/apm/apm-server-oss:7.13.0
     container_name: apm
     volumes:      
-    - ./libs/elastic/apm/apm-server.yml:/usr/share/apm-server/apm-server.yml
+    - ./apm/apm-server.yml:/usr/share/apm-server/apm-server.yml
     ports:
       - "8200:8200"
     restart: on-failure
     networks: 
       - observability
-
-  api:
-    build: ./apps/api
-    container_name: nodejs-api
-    volumes:
-      - ./apps/api:/home/node/app
-    ports:
-      - 4000:4000
-    networks: 
-        - observability
-  web:
-    build: ./apps/web
-    container_name: web-app
-    ports:
-      - 3000:80
-    networks: 
-        - observability
+      
 networks:
   observability:
     external: true
