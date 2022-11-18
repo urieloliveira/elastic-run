@@ -1,25 +1,5 @@
 version: '3'
 services:
-  api:
-    build: ./apps/api
-    container_name: nodejs-api
-    volumes:
-      - ./apps/api:/home/node/app
-    ports:
-      - 4000:4000
-    networks: 
-        - observability
-
-  web:
-    build: ./apps/web
-    container_name: web-app
-    ports:
-      - 3000:80
-    depends_on:
-      - api
-      - apm
-    networks: 
-        - observability
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.13.0
@@ -84,6 +64,22 @@ services:
     networks: 
       - observability
 
+  api:
+    build: ./apps/api
+    container_name: nodejs-api
+    volumes:
+      - ./apps/api:/home/node/app
+    ports:
+      - 4000:4000
+    networks: 
+        - observability
+  web:
+    build: ./apps/web
+    container_name: web-app
+    ports:
+      - 3000:80
+    networks: 
+        - observability
 networks:
   observability:
     external: true
