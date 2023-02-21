@@ -10,6 +10,7 @@ const Router: React.FC<RouterProps> = () => {
   return (
     <Routes>
       <ApmRoute path="/" element={<Home />} />
+      <ApmRoute path="/test" element={<Home />} />
     </Routes>
   );
 };
