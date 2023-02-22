@@ -1,0 +1,151 @@
+version: '3'
+services:
+# packages
+  shared:
+    build: ./packages/shared
+    container_name: shared-api
+    volumes:
+      - ./packages/shared:/home/node/app
+    ports:
+      - 4000:4000
+    depends_on:
+      - apm
+      - prometheus
+      - sonarqube
+
+  web:
+    build: ./packages/web
+    container_name: web-app
+    ports:
+      - 3000:80
+    depends_on:
+      - shared
+      - apm
+
+# libs
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.0
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=es-docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - http.cors.allow-origin="*"
+      - discovery.type=single-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./libs/elastic/elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+   
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.13.0
+    container_name: kibana
+    ports:
+      - 5601:5601
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      - elasticsearch
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:7.13.0
+    container_name: metricbeat
+    user: root
+    volumes:      
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./libs/elastic/beats/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  heartbeat:
+    image: docker.elastic.co/beats/heartbeat:7.13.0
+    container_name: heartbeat
+    volumes:      
+      - ./libs/elastic/beats/heartbeat.yml:/usr/share/heartbeat/heartbeat.yml
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  apm:
+    image: docker.elastic.co/apm/apm-server-oss:7.13.0
+    container_name: apm
+    volumes:      
+    - ./libs/elastic/apm/apm-server.yml:/usr/share/apm-server/apm-server.yml
+    ports:
+      - "8200:8200"
+    restart: on-failure
+    depends_on:
+      - elasticsearch
+      - kibana
+  
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    depends_on: 
+      - cadvisor
+    ports:
+      - 9090:9090
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./libs/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3333:3000
+    container_name: grafana
+    depends_on:
+      - prometheus
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.46.0
+    container_name: cadvisor
+    user: root
+    ports:
+      - 8080:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+  
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    ports:
+      - 9000:9000
+    volumes:
+      - ./libs/sonarqube/sonarqube-data/conf:/opt/sonarqube/conf
+      - ./libs/sonarqube/sonarqube-data/data:/opt/sonarqube/data
+      - ./libs/sonarqube/sonarqube-data/extensions:/opt/sonarqube/extensions
+      - ./libs/sonarqube/sonarqube-data/logs:/opt/sonarqube/logs
+      - ./libs/sonarqube/sonarqube-data/temp:/opt/sonarqube/temp
+    environment:
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://sonar-db:5432/sonar
+      - SONARQUBE_JDBC_USERNAME=sonar
+      - SONARQUBE_JDBC_PASSWORD=sonar
+      - SONARQUBE_JDBC_DRIVER_PATH=/opt/sonarqube/extensions/jdbc-driver/postgresql/postgresql-42.2.5.jar
+    depends_on:
+      - sonar-db
+      
+  sonar-db:
+    image: postgres:9.6.12-alpine
+    container_name: sonar-db
+    volumes:
+      - ./libs/sonarqube/database/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    ports:
+      - 11229:5432
