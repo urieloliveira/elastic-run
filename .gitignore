@@ -1,0 +1,9 @@
+node_modules/
+tsconfig.tsbuildinfo
+coverage
+**/*/dist
+**/*/generated
+.DS_Store
+**/*.env
+**/*.env.*
+!**/*.env.*example

@@ -18,7 +18,7 @@
 ```bash
 ├── README.md
 ├── .gitignore
-├── apps
+├── packages
 │   ├── api
 │   │   ├── Dockerfile
 │   │   ├── docker-compose.yml
@@ -59,4 +59,8 @@
 
 1. Clone o repositório
 2. Rode o comando `docker-compose up` na raiz do projeto
-3. 
+
+
+
+
+kind create cluster --name=easy-invest --config=k8s/kind.yaml

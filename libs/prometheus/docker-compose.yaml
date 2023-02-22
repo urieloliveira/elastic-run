@@ -3,7 +3,7 @@ version: '3'
 services:
   prometheus:
     image: prom/prometheus
-    container_name: prometheus
+    container_name: easy-invest-prometheus
     depends_on: 
       - cadvisor
     ports:
@@ -12,8 +12,6 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    networks:
-      - observability
 
   grafana:
     image: grafana/grafana
@@ -22,8 +20,6 @@ services:
     container_name: grafana
     depends_on:
       - prometheus
-    networks:
-      - observability
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.46.0
@@ -36,9 +32,3 @@ services:
       - /var/run:/var/run:rw
       - /sys:/sys:ro
       - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - observability
-
-networks:
-  observability:
-    external: true
