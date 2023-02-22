@@ -1,6 +1,6 @@
-declare module "@elastic/apm-rum-react" {
-  import { ComponentType } from "react";
-  import { Route } from "react-router";
+declare module '@elastic/apm-rum-react' {
+  import { ComponentType } from 'react';
+  import { Route } from 'react-router-dom';
   export const ApmRoute: typeof Route;
 
   /**
@@ -12,6 +12,6 @@ declare module "@elastic/apm-rum-react" {
    */
   export const withTransaction: (
     name: string,
-    eventType: string
+    eventType: string,
   ) => <T>(component: ComponentType<T>) => ComponentType<T>;
 }

@@ -1,16 +1,12 @@
-import React from "react";
-import { Routes } from "react-router-dom";
-import { ApmRoute } from "@elastic/apm-rum-react";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 
-const Home = React.lazy(() => import("../../presentation/Home"));
+const Home = React.lazy(() => import('../../presentation/Home'));
 
-interface RouterProps {}
-
-const Router: React.FC<RouterProps> = () => {
+const Router: React.FC = () => {
   return (
     <Routes>
-      <ApmRoute path="/" element={<Home />} />
-      <ApmRoute path="/test" element={<Home />} />
+      <Route path="/" element={<Home />} />
     </Routes>
   );
 };

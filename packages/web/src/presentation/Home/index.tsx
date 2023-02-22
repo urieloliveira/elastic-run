@@ -1,8 +1,7 @@
-import React from "react";
+import { withTransaction } from '@elastic/apm-rum-react';
+import React from 'react';
 
-interface HomeProps {}
-
-const Home: React.FC<HomeProps> = () => {
+const Home: React.FC = () => {
   return (
     <div>
       <h1>Hello World</h1>
@@ -10,4 +9,4 @@ const Home: React.FC<HomeProps> = () => {
   );
 };
 
-export default Home;
+export default withTransaction('/', 'route-change')(Home);
